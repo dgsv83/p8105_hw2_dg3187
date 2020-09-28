@@ -89,7 +89,7 @@ subway_df =
   read_csv ("./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>%
   janitor::clean_names() %>%
   select(-division, -exit_only, -staffing, -staff_hours, -ada_notes, -free_crossover, 
-         -north_south_street, -east_west_street, -corner, -entrance_latitude, -entrance_longitude,
+         -north_south_street, -east_west_street, -corner, -entrance_latitude,       -entrance_longitude,
          -station_location, -entrance_location) %>%
   mutate(entry = recode (entry, 'YES' = TRUE , 'NO' = FALSE ))
 ```
@@ -130,6 +130,29 @@ proportion_numerator / proportion_denominator
 37.70492% of the entrances/exits without vending allow entrance. 
 
 
+```{r}
+
+subway_df_route =
+  read_csv ("./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>%
+  janitor::clean_names() %>%
+  select(-division, -exit_only, -staffing, -staff_hours, -ada_notes, -free_crossover, 
+         -north_south_street, -east_west_street, -corner, -entrance_latitude,       -entrance_longitude,
+         -station_location, -entrance_location) %>%
+  mutate(route8 = recode (route8, '1' = "1" , '4' = "4", '5' = "5")) %>% 
+  mutate(route9 = recode (route9, '2' = "2", '5' = "5")) %>% 
+  mutate(route10 = recode (route10, '3' = "3"))%>% 
+  mutate(route11 = recode (route11, '7' = "7"))
+  
+        
+pivot_longer(
+    subway_df_route,
+    route1:route11,
+    names_to = "route_number",
+    values_to = "route_name"
+)
+
+
+```
 
 
 
@@ -137,7 +160,10 @@ proportion_numerator / proportion_denominator
 
 
 
-
-
+```{r}
+pols_df = 
+  read_csv ("./data/pols-month.csv") %>%
+  janitor::clean_names() 
+```
 
 
