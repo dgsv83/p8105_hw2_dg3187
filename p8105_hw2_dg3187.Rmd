@@ -140,19 +140,39 @@ subway_df_route =
          -station_location, -entrance_location) %>%
   mutate(route8 = recode (route8, '1' = "1" , '4' = "4", '5' = "5")) %>% 
   mutate(route9 = recode (route9, '2' = "2", '5' = "5")) %>% 
-  mutate(route10 = recode (route10, '3' = "3"))%>% 
+  mutate(route10 = recode (route10, '3' = "3")) %>% 
   mutate(route11 = recode (route11, '7' = "7"))
   
-        
-pivot_longer(
+subway_df_route=        
+  pivot_longer(
     subway_df_route,
     route1:route11,
     names_to = "route_number",
     values_to = "route_name"
 )
 
-
 ```
+
+
+
+```{r}
+subway_df_only_A =
+  distinct(subway_df_route, station_name, route_name) %>% 
+  filter (route_name == "A") %>% 
+  nrow()
+```
+
+56 distinct stations serve the A train. 
+
+
+```{r}
+subway_df_only_A_ada = 
+  distinct(subway_df_route, station_name, route_name, ada) %>% 
+  filter (route_name == "A", ada == "TRUE") %>% 
+  nrow()
+```
+
+Of the 56 distinct stations that serve the A train, 16 are ADA compliant. 
 
 
 
