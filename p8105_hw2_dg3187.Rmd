@@ -95,7 +95,49 @@ subway_df =
 ```
 
 
+This data set is about subway system in NYC. I imported the csv file into R and briefly cleaned the variable names with janitor::clean_names. Then, I excluded variables such as staffing, entrance latitude, and entrance longitude,etc. There are `r nrow(subway_df) ` rows and `r ncol(subway_df) ` columns in the existing dataframe now. After the first round of cleaning, variables retained are `r names(subway_df)`. Thus far, the data is not yet tidy.  
+
+
+```{r}
+subway_df_clean =
+  distinct(subway_df, station_name, line, ada) %>% 
+  filter (ada == TRUE) %>% 
+  nrow()
+```
+
+There are 465 distinct stations. 84 of them are ADA compliant. 
+
+
+
+```{r}
+
+proportion_denominator = 
+  select (subway_df, entry, vending) %>% 
+  filter (vending == "NO") %>% 
+  nrow()
+
+proportion_numerator = 
+  select (subway_df, entry, vending) %>% 
+  filter (entry == TRUE, vending == "NO") %>% 
+  nrow()
+
+
+proportion_numerator / proportion_denominator
+
+```
+
+
+37.70492% of the entrances/exits without vending allow entrance. 
+
+
 
 
 
 ## Problem 3
+
+
+
+
+
+
+
