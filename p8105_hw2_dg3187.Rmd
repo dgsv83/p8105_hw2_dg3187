@@ -80,3 +80,22 @@ This dataset contains information from the Mr. TrashWheel trash collector in Bal
 
 
 
+## Problem 2
+
+
+
+```{r}
+subway_df = 
+  read_csv ("./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>%
+  janitor::clean_names() %>%
+  select(-division, -exit_only, -staffing, -staff_hours, -ada_notes, -free_crossover, 
+         -north_south_street, -east_west_street, -corner, -entrance_latitude, -entrance_longitude,
+         -station_location, -entrance_location) %>%
+  mutate(entry = recode (entry, 'YES' = TRUE , 'NO' = FALSE ))
+```
+
+
+
+
+
+## Problem 3
