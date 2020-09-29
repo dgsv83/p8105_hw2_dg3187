@@ -174,61 +174,72 @@ Firstly,let's deal with the data in pols-month.csv.
 Import and clean the pols-months data, break up the variable mon into integer variables year, month, and day; replace month number with month name
 
 ```{r}
-pols_df = 
-  read_csv ("./data/pols-month.csv") %>%
-  janitor::clean_names() %>% 
-  separate(mon, into = c("year", "month", "day")) %>% 
-  mutate(month = as.numeric(month),
+
+pols_month_df = 
+          read_csv("./data/pols-month.csv") %>% 
+          janitor::clean_names() %>% 
+          separate(mon, c("year", "month", "day"), sep = "([-])") %>% 
+          mutate(month = as.numeric(month),
                  day = as.numeric(day),
                  year = as.numeric(year),
-                 value = year * 100 + month
+                 sixdig = year * 100 + month
                  ) %>% 
-   relocate(value)
-
+          relocate(prez_gop, prez_dem) %>% 
+          pivot_longer(
+                 prez_gop:prez_dem,
+                 names_to = "president",
+                 names_prefix = "prez_",
+                 values_to = "president_number"
+          ) %>% 
+          filter(president_number == 1) %>% 
+          select(-day) %>% 
+          relocate(sixdig)
+          
 month_df = 
   tibble(
     month = 1:12,
     month_name = month.name
   )
 
-pols_df = 
-         left_join(pols_df, month_df, by = "month") %>% 
-         relocate(value, year, month_name) %>% 
-         select(-month,-value) %>% 
+pols_month_df = 
+         left_join(pols_month_df, month_df, by = "month") %>% 
+         relocate(sixdig, year, month_name) %>% 
+         select(-month, -sixdig) %>% 
          rename(month = month_name)
+
 ```
-
-
-Create a president variable taking values gop and dem:
-```{r}
-pols_df_new =
-  pivot_longer(
-    pols_df,
-    prez_gop:rep_dem,
-    names_to = "president_category",
-    values_to = "president") 
- 
-```
-
-
-Remove prez_dem and prez_gop; and remove the day variable:
-```{r}
-pols_df_omit_prez = 
- filter(pols_df_new, president_category %in% c("gov_gop","sen_gop", "rep_gop",    
-                                                "gov_dem","sen_dem","rep_dem")) %>% 
- select(-day)
-```
-
 
 
 
 
 Secondly, we move on to snp.csv data.
 
-
 ```{r}
 snp_df = 
   read_csv ("./data/snp.csv") %>%
-  janitor::clean_names()
+  janitor::clean_names() %>% 
+  separate(date, c("month", "day", "year"), sep = "([/])") %>% 
+            mutate(month = as.numeric(month),
+                 day = as.numeric(day),
+                 year = as.numeric(year),
+                 sixdig1 = year * 100 + month
+                 ) %>% 
+          select(-day) %>% 
+          relocate(sixdig1)
+          
+month_df = 
+  tibble(
+    month = 1:12,
+    month_name = month.name
+  )
+
+snp_df = 
+         left_join(snp_df, month_df, by = "month") %>% 
+         relocate(sixdig1, year, month_name) %>% 
+         select(-month, -sixdig1) %>% 
+         rename(month = month_name)
 ```
+
+
+
 
