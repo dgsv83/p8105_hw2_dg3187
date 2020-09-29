@@ -132,58 +132,103 @@ proportion_numerator / proportion_denominator
 
 ```{r}
 
-subway_df_route =
-  read_csv ("./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>%
-  janitor::clean_names() %>%
-  select(-division, -exit_only, -staffing, -staff_hours, -ada_notes, -free_crossover, 
-         -north_south_street, -east_west_street, -corner, -entrance_latitude,       -entrance_longitude,
-         -station_location, -entrance_location) %>%
-  mutate(route8 = recode (route8, '1' = "1" , '4' = "4", '5' = "5")) %>% 
-  mutate(route9 = recode (route9, '2' = "2", '5' = "5")) %>% 
-  mutate(route10 = recode (route10, '3' = "3")) %>% 
-  mutate(route11 = recode (route11, '7' = "7"))
-  
-subway_df_route=        
+subway_df_route = 
+  mutate_at(subway_df, vars(route8:route11), as.character) %>%
   pivot_longer(
-    subway_df_route,
     route1:route11,
-    names_to = "route_number",
-    values_to = "route_name"
-)
+    names_to = "route_name",
+    values_to = "route_number"
+  )
 
 ```
 
-
+from route 8 to route 11 are in the format of double, we need to first convert them to character. 
 
 ```{r}
-subway_df_only_A =
-  distinct(subway_df_route, station_name, route_name) %>% 
-  filter (route_name == "A") %>% 
-  nrow()
+filter(subway_df_route, route_number == "A") %>% 
+  select(route_number, line, station_name) %>% 
+  distinct(route_number, line, station_name)
+
+
+filter(subway_df_route, route_number == "A", ada == "TRUE") %>% 
+  select(route_number, ada, line, station_name) %>%  
+  distinct(route_number, ada, line, station_name)
+
 ```
 
-56 distinct stations serve the A train. 
+60 distinct stations serve the A train. 
+
+Of the 60 distinct stations that serve the A train, 17 are ADA compliant. 
 
 
-```{r}
-subway_df_only_A_ada = 
-  distinct(subway_df_route, station_name, route_name, ada) %>% 
-  filter (route_name == "A", ada == "TRUE") %>% 
-  nrow()
-```
 
-Of the 56 distinct stations that serve the A train, 16 are ADA compliant. 
+
+
 
 
 
 ## Problem 3
 
 
+Firstly,let's deal with the data in pols-month.csv. 
+Import and clean the pols-months data, break up the variable mon into integer variables year, month, and day; replace month number with month name
 
 ```{r}
 pols_df = 
   read_csv ("./data/pols-month.csv") %>%
-  janitor::clean_names() 
+  janitor::clean_names() %>% 
+  separate(mon, into = c("year", "month", "day")) %>% 
+  mutate(month = as.numeric(month),
+                 day = as.numeric(day),
+                 year = as.numeric(year),
+                 value = year * 100 + month
+                 ) %>% 
+   relocate(value)
+
+month_df = 
+  tibble(
+    month = 1:12,
+    month_name = month.name
+  )
+
+pols_df = 
+         left_join(pols_df, month_df, by = "month") %>% 
+         relocate(value, year, month_name) %>% 
+         select(-month,-value) %>% 
+         rename(month = month_name)
 ```
 
+
+Create a president variable taking values gop and dem:
+```{r}
+pols_df_new =
+  pivot_longer(
+    pols_df,
+    prez_gop:rep_dem,
+    names_to = "president_category",
+    values_to = "president") 
+ 
+```
+
+
+Remove prez_dem and prez_gop; and remove the day variable:
+```{r}
+pols_df_omit_prez = 
+ filter(pols_df_new, president_category %in% c("gov_gop","sen_gop", "rep_gop",    
+                                                "gov_dem","sen_dem","rep_dem")) %>% 
+ select(-day)
+```
+
+
+
+
+
+Secondly, we move on to snp.csv data.
+
+
+```{r}
+snp_df = 
+  read_csv ("./data/snp.csv") %>%
+  janitor::clean_names()
+```
 
